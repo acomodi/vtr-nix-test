@@ -1,8 +1,4 @@
-set -e
+source $stdenv/setup
 
-unset PATH
-for p in $buildInputs; do
-  export PATH=$p/bin${PATH:+:}$PATH
-done
-
-cp -r $src/* $out
+mkdir -p $out
+tar xzf $tarball -C $out

@@ -1,0 +1,9 @@
+diff --git a/abc/CMakeLists.txt b/abc/CMakeLists.txt
+index 7cf6f19af..97e52ec64 100644
+--- a/abc/CMakeLists.txt
++++ b/abc/CMakeLists.txt
+@@ -103,3 +103,4 @@ add_library(libabc-pic EXCLUDE_FROM_ALL ${ABC_SRC})
+ abc_properties(libabc-pic PUBLIC)
+ set_property(TARGET libabc-pic PROPERTY POSITION_INDEPENDENT_CODE ON)
+ set_property(TARGET libabc-pic PROPERTY OUTPUT_NAME abc-pic)
++install(TARGETS abc libabc DESTINATION bin)

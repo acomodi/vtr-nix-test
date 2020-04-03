@@ -82,7 +82,7 @@ in rec {
     vtr_src = vtr.src;
     builder = "${bash}/bin/bash";
     args = [ ./vtr_task_builder.sh ];
-    nativeBuildInputs = [ breakpointHook ];
+    nativeBuildInputs = [ breakpointHook ]; # debug
   } // attrs);
 
   # hierarchy matches the directory layout

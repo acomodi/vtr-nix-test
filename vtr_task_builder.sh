@@ -43,11 +43,18 @@ done
 # copy blifs and sdcs
 link_blif_and_sdc "$titan_benchmarks/titan_release_*/benchmarks/titan23/*/*/*.blif" vtr_flow/benchmarks/titan_blif
 link_blif_and_sdc "$titan_benchmarks/titan_release_*/benchmarks/other_benchmarks/*/*/*.blif" vtr_flow/benchmarks/titan_other_blif
+cp -s $ispd_benchmarks/ispd_benchmarks_*/benchmarks/*/*.blif vtr_flow/benchmarks/ispd_blif
 
 cd vtr_flow
 
 # run the task
 ./scripts/run_vtr_task.pl $task -j $NIX_BUILD_CORES -s $flags
+
+# remove references
+find tasks/$task/latest/ -type f -print0 | xargs -0 sed -i \
+  -e "s+$coreutils+\$coreutils+g" \
+  -e "s+$titan_benchmarks+\$titan_benchmarks+g" \
+  -e "s+$ispd_benchmarks+\$ispd_benchmarks+g"
 
 # store the results
 mkdir -p $out

@@ -19,12 +19,17 @@ cp -r $vtr_flow .
 cp -s $vtr/bin/vpr vpr
 cp -s $vtr/bin/odin_II ODIN_II
 cp -r $vtr_src/abc .
+cp -r $vtr_src/ace2 .
 chmod -R +w .
 rm -f abc/abc
 cp -s $vtr/bin/abc abc
+rm -f ace2/ace
+cp -s $vtr/bin/ace ace2
 
 # no /usr/bin/env, so replace with absolute path from coreutils
-sed -i "s+/usr/bin/env+$coreutils/bin/env+g" vtr_flow/scripts/run_vtr_{task,flow}.pl
+sed -i "s+/usr/bin/env+$coreutils/bin/env+g" \
+  vtr_flow/scripts/run_vtr_{task,flow}.pl \
+  ace2/scripts/extract_clk_from_blif.py
 
 # copy arch from titan
 for i in $titan_benchmarks/titan_release_*/arch/stratixiv*.xml; do

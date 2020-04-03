@@ -47,9 +47,10 @@ link_blif_and_sdc "$titan_benchmarks/titan_release_*/benchmarks/other_benchmarks
 cd vtr_flow
 
 # run the task
-./scripts/run_vtr_task.pl $task -s $flags
+./scripts/run_vtr_task.pl $task -j $NIX_BUILD_CORES -s $flags
 
 # store the results
+mkdir -p $out
 cp -r tasks/$task/latest/* $out
 echo "$task" > $out/task_name
 echo "$flags" > $out/task_flags

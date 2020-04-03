@@ -61,4 +61,5 @@ mkdir -p $out
 cp -r tasks/$task/latest/* $out
 echo "$task" > $out/task_name
 echo "$flags" > $out/task_flags
+cp "$vtr/opts" $out/vtr_opts
 

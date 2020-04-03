@@ -23,7 +23,7 @@ users.extraUsers.<your-username> = {
   createHome = true;
   home = "/home/<your-username>";
   description = "<your-name>";
-  group = "users"; 
+  group = "users";
   extraGroups = [ "wheel" ];
   useDefaultShell = true;
   openssh.authorizedKeys.keys = [ "<contents of your ~/.ssh/id_rsa.pub>" ];
@@ -35,10 +35,28 @@ nix.extraOptions = ''
   trusted-users = <your-username>
 '';
 ```
+After changing `/etc/nixos/configuration.nix`, run `nix-os rebuild switch` (as root).
+
+SSH in to each instance to check that it works and to add the remote machine to `~/.ssh/known_hosts`. Make sure that no interactive password is required (e.g. use `ssh-add` if needed.)
 
 #### LET'S DO SOME TESTS
 
 ```shell
 mkdir out
-nix build -f . regression_tests.vtr_reg_strong -j0 -o out/result --builders "ssh://<ip> - - <jobs> ; ..."
+nix build -f . regression_tests.vtr_reg_strong -j0 -o out/result --builders "ssh://<ip> - - <jobs> ; ...<for each ip>"
 ```
+
+If you'd like to see all the output:
+
+```shell
+nix-build -A regression_tests.vtr_reg_strong -j0 -o out/result --builders "ssh://<ip> - - <jobs> ; ...<for each ip>"
+
+```
+
+#### Creating a new test run
+
+Add a top level attribute to `runs.nix`, with sub-attributes for what you want to run using `make_regression_tests`.
+
+See the top of that file for configuration options passed to `make_regression_tests`. You can select sub-tests by appending `.<test name>`.
+
+Tests are defined in `make_regression_tests.nix`, and mirror VTR's `task_list.txt`s.

@@ -40,7 +40,7 @@ in rec {
       coreutils
     ];
     src = fetchGit { # get the source using git
-      url = "dusty@hank-wifi:~/src/vtr-verilog-to-routing";
+      url = "https://github.com/verilog-to-routing/vtr-verilog-to-routing.git";
     };
     patches = [ ./install_abc.patch ];
     postInstall = ''

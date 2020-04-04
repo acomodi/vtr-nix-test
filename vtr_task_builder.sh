@@ -48,7 +48,7 @@ cp -s $ispd_benchmarks/ispd_benchmarks_*/benchmarks/*/*.blif vtr_flow/benchmarks
 cd vtr_flow
 
 # run the task
-./scripts/run_vtr_task.pl $task -j $NIX_BUILD_CORES -s $flags
+./scripts/run_vtr_task.pl $task -j $NIX_BUILD_CORES -s $flags || true # don't abort on failure
 
 # remove references
 find tasks/$task/latest/ -type f -print0 | xargs -0 sed -i \

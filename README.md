@@ -13,7 +13,7 @@ Create an image
 gcloud compute images create nixos-18091228-a4c4cbb613c-x86-64-linux --source-uri gs://nixos-cloud-images/nixos-image-18.09.1228.a4c4cbb613c-x86_64-linux.raw.tar.gz
 ```
 
-Create instances with that image and at least a 128GB SSD.
+Create instances with that image and at least a 512GB SSD.
 
 For each instance, use `gcloud` or the console to log in, and add this to `/etc/nixos/configuration.nix`before the last closing `}`:
 

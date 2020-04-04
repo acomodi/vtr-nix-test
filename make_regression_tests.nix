@@ -1,7 +1,7 @@
 # make_regression_tests
-{ mkTests, ... }:
+{ mkTests, addAll, ... }:
 opts:
-{
+addAll "regression_tests" {
   vtr_reg_basic = mkTests opts "regression_tests/vtr_reg_basic" [
     "basic_no_timing"
     "basic_timing"

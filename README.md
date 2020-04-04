@@ -43,19 +43,19 @@ SSH in to each instance to check that it works and to add the remote machine to 
 
 ```shell
 mkdir out
-nix build -f . regression_tests.vtr_reg_strong -j0 -o out/result --builders "ssh://<ip> - - <jobs> ; ...<for each ip>"
+nix build -f . tests.regression_tests.vtr_reg_strong.all -j0 --builders "ssh://<ip> - - <jobs> ; ...<for each ip>"
 ```
 
 If you'd like to see all the output:
 
 ```shell
-nix-build -A regression_tests.vtr_reg_strong -j0 -o out/result --builders "ssh://<ip> - - <jobs> ; ...<for each ip>"
+nix-build -A tests.regression_tests.vtr_reg_strong.all -j0 --builders "ssh://<ip> - - <jobs> ; ...<for each ip>"
 
 ```
 
-#### Creating a new test run
+#### Creating a new test
 
-Add a top level attribute to `runs.nix`, with sub-attributes for what you want to run using `make_regression_tests`.
+Add a top level attribute to `tests.nix`, with sub-attributes for what you want to run using `make_regression_tests`.
 
 See the top of that file for configuration options passed to `make_regression_tests`. You can select sub-tests by appending `.<test name>`.
 

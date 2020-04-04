@@ -1,6 +1,7 @@
 with import <nixpkgs> {};
 
 let # build custom versions of Python with the packages we need
+  inherit (lib.attrsets) mapAttrsToList;
   python_packages = p: with p; [
     pip
     virtualenv
@@ -14,7 +15,7 @@ let # build custom versions of Python with the packages we need
     # build and install binaries and vtr_flow
     vtr = { url ? "https://github.com/verilog-to-routing/vtr-verilog-to-routing.git", # git repo
             variant ? "verilog-to-routing", # identifier
-            rev ? current_vtr_rev, # specific revision
+            rev ? tests.default_vtr_rev, # specific revision
             patches ? [] # any patches to apply
           }: stdenv.mkDerivation {
             name = "vtr-${variant}-${rev}";
@@ -81,12 +82,13 @@ let # build custom versions of Python with the packages we need
     # list of tasks to run (config.txt) with run_vtr_task
     # opts.flags: flags passed tp vpr
     # opts.
+    pathToName = builtins.replaceStrings ["/"] ["_"];
     vtrTaskDerivation = opts: test_name: attrs: stdenv.mkDerivation (
       let custom_vtr = vtr (if opts ? vtr then opts.vtr else {});
       in {
         flags = if opts ? flags then opts.flags else "";
         task = test_name;
-        name = builtins.replaceStrings ["/"] ["_"] test_name;
+        name = pathToName test_name;
         buildInputs = [ time coreutils perl python3 ];
         vtr_flow = "${custom_vtr}/vtr_flow";
         inherit titan_benchmarks ispd_benchmarks coreutils;
@@ -97,18 +99,28 @@ let # build custom versions of Python with the packages we need
         nativeBuildInputs = [ breakpointHook ]; # debug
       } // attrs);
 
+    # adds an .all derivation that links to all the other derivations in the set
+    addAll = root: tests:
+      let f = name: val: {
+            name = name;
+            path = if builtins.typeOf val == "set" then val.all else val;
+          };
+      in
+        tests // {
+          all = linkFarm "${root}_all" (mapAttrsToList f tests);
+        };
+
     # hierarchy matches the directory layout
     mkTests = opts: root: tests:
-      builtins.listToAttrs (map (test: {
+      addAll (pathToName root) (builtins.listToAttrs (map (test: {
         name = test;
         value = vtrTaskDerivation opts "${root}/${test}" {};
-      }) tests);
-    regression_tests = make_regression_tests {};
-    make_regression_tests = opts: import ./make_regression_tests.nix self opts;
+      }) tests));
 
-    current_vtr_rev = "508b52fada225670f6ae4f3e053e6bfd39389412";
+    # make a custom set of regression tests
+    make_regression_tests = import ./make_regression_tests.nix self;
 
-    # import runs
-    runs = import ./runs.nix self;
+    # import tests
+    tests = import ./tests.nix self;
   };
 in self

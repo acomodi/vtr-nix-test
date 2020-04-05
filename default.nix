@@ -15,6 +15,7 @@ let # build custom versions of Python with the packages we need
     # build and install binaries and vtr_flow
     vtr = { url ? "https://github.com/verilog-to-routing/vtr-verilog-to-routing.git", # git repo
             variant ? "verilog-to-routing", # identifier
+            ref ? "HEAD", # git ref
             rev ? tests.default_vtr_rev, # specific revision
             patches ? [] # any patches to apply
           }: stdenv.mkDerivation {
@@ -45,14 +46,16 @@ let # build custom versions of Python with the packages we need
             ];
             src = fetchGit { # get the source using git
               url = url;
+              ref = ref;
               rev = rev;
             };
             patches = [ ./install_abc.patch ] ++ patches;
             postInstall = ''
             cp -r $src/vtr_flow $out
             echo "variant: ${variant}" > $out/opts
-            echo "url:     ${url}" >> $out/opts
-            echo "rev:     ${rev}" >> $out/opts
+            echo "url:     ${url}"    >> $out/opts
+            echo "ref:     ${ref}"    >> $out/opts
+            echo "rev:     ${rev}"    >> $out/opts
           '';
           };
 

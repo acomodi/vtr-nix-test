@@ -14,32 +14,24 @@ rec {
   # unmodified tests
   regression_tests = make_regression_tests {};
 
-  # a sweep over a few values of --inner_num
-  inner_num_sweep = addAll "inner_num_sweep" {
-    vtr_reg_weekly_inner_num_0_5  = (make_regression_tests { flags = "--inner_num 0.5"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_1_0  = (make_regression_tests { flags = "--inner_num 1.0"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_2_0  = (make_regression_tests { flags = "--inner_num 2.0"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_5_0  = (make_regression_tests { flags = "--inner_num 5.0"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_10_0 = (make_regression_tests { flags = "--inner_num 10.0"; }).vtr_reg_weekly;
-  };
   vtr_dusty_sa = {
     variant = "dusty_sa";
     url = "https://github.com/HackerFoo/vtr-verilog-to-routing.git";
     ref = "dusty_sa";
     rev = "9015e80d490ad707c88e851b97ada71d44c8037e";
   };
-  inner_num_sweep_no_flag = addAll "inner_num_sweep" {
-    vtr_reg_weekly_inner_num_0_5  = (make_regression_tests { vtr = vtr_dusty_sa; flags = "--inner_num 0.5"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_1_0  = (make_regression_tests { vtr = vtr_dusty_sa; flags = "--inner_num 1.0"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_2_0  = (make_regression_tests { vtr = vtr_dusty_sa; flags = "--inner_num 2.0"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_5_0  = (make_regression_tests { vtr = vtr_dusty_sa; flags = "--inner_num 5.0"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_10_0 = (make_regression_tests { vtr = vtr_dusty_sa; flags = "--inner_num 10.0"; }).vtr_reg_weekly;
-  };
-  inner_num_sweep_with_flag = addAll "inner_num_sweep" {
-    vtr_reg_weekly_inner_num_0_5  = (make_regression_tests { vtr = vtr_dusty_sa; flags = "--alpha_min 0.2 --inner_num 0.5"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_1_0  = (make_regression_tests { vtr = vtr_dusty_sa; flags = "--alpha_min 0.2 --inner_num 1.0"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_2_0  = (make_regression_tests { vtr = vtr_dusty_sa; flags = "--alpha_min 0.2 --inner_num 2.0"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_5_0  = (make_regression_tests { vtr = vtr_dusty_sa; flags = "--alpha_min 0.2 --inner_num 5.0"; }).vtr_reg_weekly;
-    vtr_reg_weekly_inner_num_10_0 = (make_regression_tests { vtr = vtr_dusty_sa; flags = "--alpha_min 0.2 --inner_num 10.0"; }).vtr_reg_weekly;
+
+  # a sweep over a few values of --inner_num
+  test_type = "vtr_reg_weekly";
+  dot_to_us = builtins.replaceStrings ["."] ["_"];
+  inner_num_values = ["0.5" "1.0" "2.0" "5.0"];
+  make_inner_num_sweep = fn: builtins.listToAttrs (map (val: {
+    name = "${test_type}_inner_num_${dot_to_us val}";
+    value = (make_regression_tests { flags = "--inner_num ${val}"; }).${test_type};
+  }) inner_num_values);
+  inner_num_sweep = addAll "inner_num_sweep" {
+    baseline = addAll "baseline" (make_inner_num_sweep (val: { flags = "--inner_num ${val}"; }));
+    no_flag = addAll "no_flag" (make_inner_num_sweep (val: { vtr = vtr_dusty_sa; flags = "--inner_num ${val}"; }));
+    with_flag = addAll "with_flag" (make_inner_num_sweep (val: { vtr = vtr_dusty_sa; flags = "--alpha_min 0.2 --inner_num ${val}"; }));
   };
 }

@@ -22,9 +22,9 @@ rec {
   };
 
   # a sweep over a few values of --inner_num
-  test_type = "vtr_reg_weekly";
+  test_type = "vtr_reg_weekly_no_he";
   dot_to_us = builtins.replaceStrings ["."] ["_"];
-  inner_num_values = ["0.5" "1.0" "2.0" "5.0"];
+  inner_num_values = ["0.5" "1.0" "2.0"];
   make_inner_num_sweep = fn: builtins.listToAttrs (map (val: {
     name = "${test_type}_inner_num_${dot_to_us val}";
     value = (make_regression_tests { flags = "--inner_num ${val}"; }).${test_type};

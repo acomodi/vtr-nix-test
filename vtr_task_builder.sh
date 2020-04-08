@@ -50,6 +50,9 @@ cd vtr_flow
 # run the task
 ./scripts/run_vtr_task.pl $task -j $NIX_BUILD_CORES -s $flags || true # don't abort on failure
 
+# parse the results
+./scripts/parse_vtr_task.pl $task || true
+
 # remove references
 find tasks/$task/latest/ -type f -print0 | xargs -0 sed -i \
   -e "s+$coreutils+\$coreutils+g" \

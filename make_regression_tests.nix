@@ -94,4 +94,11 @@ addAll "regression_tests" {
     "vtr_reg_fpu_soft_logic_arch"
     "vpr_ispd"
   ];
+  vtr_reg_weekly_no_he = mkTests opts "regression_tests/vtr_reg_weekly" [
+    "vtr_reg_titan"
+    "vtr_reg_qor_chain_predictor_off"
+    "vtr_reg_fpu_hard_block_arch"
+    "vtr_reg_fpu_soft_logic_arch"
+    "vpr_ispd"
+  ];
 }

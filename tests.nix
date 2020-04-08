@@ -27,7 +27,7 @@ rec {
   inner_num_values = ["0.5" "1.0" "2.0"];
   make_inner_num_sweep = fn: builtins.listToAttrs (map (val: {
     name = "${test_type}_inner_num_${dot_to_us val}";
-    value = (make_regression_tests { flags = "--inner_num ${val}"; }).${test_type};
+    value = (make_regression_tests (fn val)).${test_type};
   }) inner_num_values);
   inner_num_sweep = addAll "inner_num_sweep" {
     baseline = addAll "baseline" (make_inner_num_sweep (val: { flags = "--inner_num ${val}"; }));

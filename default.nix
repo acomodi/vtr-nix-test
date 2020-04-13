@@ -90,6 +90,7 @@ let # build custom versions of Python with the packages we need
       let custom_vtr = vtr (if opts ? vtr then opts.vtr else {});
       in {
         flags = if opts ? flags then opts.flags else "";
+        run_id = if opts ? run_id then opts.run_id else "default";
         task = test_name;
         name = pathToName test_name;
         buildInputs = [ time coreutils perl python3 ];

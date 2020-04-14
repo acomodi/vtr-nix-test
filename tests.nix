@@ -41,8 +41,11 @@ rec {
   };
   inner_num_sweep_weekly = make_inner_num_sweep_comparison "vtr_reg_weekly_no_he" ["0.5" "1.0" "2.0"] { };
   inner_num_sweep_nightly = make_inner_num_sweep_comparison "vtr_reg_nightly" ["0.125" "0.25" "0.5" "1.0" "2.0"] { run_id = "1"; };
+  inner_num_sweep_nightly_2 = make_inner_num_sweep_comparison "vtr_reg_nightly" ["0.125" "0.25" "0.5" "1.0" "2.0"] { run_id = "2"; };
+  inner_num_sweep_nightly_3 = make_inner_num_sweep_comparison "vtr_reg_nightly" ["0.125" "0.25" "0.5" "1.0" "2.0"] { run_id = "3"; };
   dusty_sa = make_regression_tests { vtr = vtr_dusty_sa; flags = "--alpha_min 0.2"; };
   node_reordering = make_regression_tests { vtr = vtr_node_reordering; flags = "--reorder_rr_graph_nodes_threshold 1 --reorder_rr_graph_nodes_algorithm degree_bfs"; };
   node_reordering_random = make_regression_tests { vtr = vtr_node_reordering; flags = "--reorder_rr_graph_nodes_threshold 1 --reorder_rr_graph_nodes_algorithm random_shuffle"; };
   node_reordering_off = make_regression_tests { vtr = vtr_node_reordering; };
+  inner_num_sweep_with_flag_high = addAll "with_flag" (make_inner_num_sweep "vtr_reg_nightly" (val: { run_id = "with_flag_high"; flags = "--alpha_min 0.2 --inner_num ${val}"; }) ["4.0" "10.0"]);
 }

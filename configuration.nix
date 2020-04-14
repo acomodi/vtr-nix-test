@@ -37,5 +37,5 @@ in {
   trusted-users = ${user}
   secret-key-files = /etc/nix/cache-priv-key.pem
 '';
-
+  zramSwap.enable = true;
 }

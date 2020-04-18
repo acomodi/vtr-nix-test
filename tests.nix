@@ -6,7 +6,7 @@
 # vtr.url: location of the VTR repo
 # vtr.rev: git revision
 # vtr.patches: list of patches to apply to VTR
-{ make_regression_tests, addAll, ... }:
+{ make_regression_tests, addAll, vtrDerivation, ... }:
 rec {
   # default VTR revision
   default_vtr_rev = "6428b63f06eccf5ead8c27158e22a46b0ad4cd19";
@@ -14,15 +14,15 @@ rec {
   # unmodified tests
   regression_tests = make_regression_tests {};
 
-  vtr_dusty_sa = {
+  vtr_dusty_sa = vtrDerivation {
     variant = "dusty_sa";
     url = "https://github.com/HackerFoo/vtr-verilog-to-routing.git";
     ref = "dusty_sa";
     rev = "7b945a3781ad12e7a5ef5ffd274348c40215b7fe";
   };
 
-  vtr_node_reordering = {
-    variant = "dusty_sa";
+  vtr_node_reordering = vtrDerivation {
+    variant = "node_reordering_flag";
     url = "https://github.com/HackerFoo/vtr-verilog-to-routing.git";
     ref = "node_reordering_flag";
     rev = "7872c8f6cb32efb988138b50e3caf198bb2212ac";

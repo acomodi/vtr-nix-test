@@ -1,7 +1,8 @@
 with import <nixpkgs> {};
 
+with lib;
+
 let # build custom versions of Python with the packages we need
-  inherit (lib.attrsets) mapAttrsToList;
   python_packages = p: with p; [
     pip
     virtualenv
@@ -13,12 +14,12 @@ let # build custom versions of Python with the packages we need
   self = rec {
 
     # build and install binaries and vtr_flow
-    vtr = { url ? "https://github.com/verilog-to-routing/vtr-verilog-to-routing.git", # git repo
-            variant ? "verilog-to-routing", # identifier
-            ref ? "HEAD", # git ref
-            rev ? tests.default_vtr_rev, # specific revision
-            patches ? [] # any patches to apply
-          }: stdenv.mkDerivation {
+    vtrDerivation = { url ? "https://github.com/verilog-to-routing/vtr-verilog-to-routing.git", # git repo
+                      variant ? "verilog-to-routing", # identifier
+                      ref ? "HEAD", # git ref
+                      rev ? tests.default_vtr_rev, # specific revision
+                      patches ? [] # any patches to apply
+                    }: stdenv.mkDerivation {
             name = "vtr-${variant}-${rev}";
             buildInputs = [ # dependencies
               bison
@@ -86,22 +87,47 @@ let # build custom versions of Python with the packages we need
     # opts.flags: flags passed tp vpr
     # opts.
     pathToName = builtins.replaceStrings ["/"] ["_"];
-    vtrTaskDerivation = opts: test_name: attrs: stdenv.mkDerivation (
-      let custom_vtr = vtr (if opts ? vtr then opts.vtr else {});
-      in {
-        flags = if opts ? flags then opts.flags else "";
-        run_id = if opts ? run_id then opts.run_id else "default";
-        task = test_name;
-        name = pathToName test_name;
-        buildInputs = [ time coreutils perl python3 ];
-        vtr_flow = "${custom_vtr}/vtr_flow";
-        inherit titan_benchmarks ispd_benchmarks coreutils;
-        vtr = custom_vtr;
-        vtr_src = custom_vtr.src;
-        builder = "${bash}/bin/bash";
-        args = [ ./vtr_task_builder.sh ];
-        nativeBuildInputs = [ breakpointHook ]; # debug
-      } // attrs);
+    vtrFlowDerivation = cfg: stdenv.mkDerivation (
+      let opts = {
+            flags = "";
+            run_id = "default";
+            vtr = vtrDerivation {};
+          } // cfg;
+      in
+        opts // {
+          buildInputs = [ time coreutils perl python3 ];
+          vtr_flow = "${opts.vtr}/vtr_flow";
+          inherit titan_benchmarks ispd_benchmarks coreutils;
+          vtr_src = opts.vtr.src;
+          builder = "${bash}/bin/bash";
+          args = [ ./vtr_flow_builder.sh ];
+          nativeBuildInputs = [ breakpointHook ]; # debug
+        });
+    removeExtension = str: builtins.head (builtins.match "([^\.]*).*" str);
+    nameStr = builtins.replaceStrings [" " "/" "." "," ":"] ["_" "_" "_" "_" "_"];
+    vtrTaskDerivations = root: cfg @ { arch_list, circuit_list, script_params_list ? [""],
+                                       script_params ? "", script_params_common ? script_params, ... }:
+      listToAttrs (map (arch:
+        let arch_name = removeExtension arch; in
+        {
+          name = nameStr arch_name;
+          value = addAll "${root}_${arch_name}" (listToAttrs (map (circuit:
+            let circuit_name = removeExtension circuit; in
+            {
+              name = nameStr circuit_name;
+              value = addAll "${root}_${arch_name}_${circuit_name}" (listToAttrs (map (script_params:
+                let script_params_name = if stringLength script_params == 0
+                                         then "common"
+                                         else "common_" + (builtins.replaceStrings [" "] ["_"] script_params); in
+                  {
+                    name = nameStr script_params_name;
+                    value = vtrFlowDerivation (removeAttrs cfg ["arch_list" "circuit_list" "script_params_list"] // {
+                      name = nameStr "${root}_${arch_name}_${circuit_name}_${script_params_name}";
+                      inherit arch circuit script_params script_params_name script_params_common;
+                    });
+                  }) script_params_list));
+            }) circuit_list));
+        }) arch_list);
 
     # adds an .all derivation that links to all the other derivations in the set
     addAll = root: tests:
@@ -111,18 +137,28 @@ let # build custom versions of Python with the packages we need
           };
       in
         tests // {
-          all = linkFarm "${root}_all" (mapAttrsToList f tests);
+          all = linkFarm "${nameStr root}_all" (mapAttrsToList f tests);
         };
 
-    # hierarchy matches the directory layout
-    mkTests = opts: root: tests:
-      addAll (pathToName root) (builtins.listToAttrs (map (test: {
-        name = test;
-        value = vtrTaskDerivation opts "${root}/${test}" {};
-      }) tests));
+    mkTests = root: attrs: opts:
+      if attrs ? task
+      then
+        vtrTaskDerivations root (attrs // opts // { name = root; })
+      else
+        let attrToTests = name: value: addAll root (mkTests "${root}_${name}" value opts);
+        in builtins.mapAttrs attrToTests attrs;
+
+    vtr_tests = derivation rec {
+      name = "vtr_tests";
+      system = builtins.currentSystem;
+      vtr = vtrDerivation {};
+      vtr_src = vtr.src;
+      builder = "${python}/bin/python";
+      args = [ ./convert_tests.py "${vtr.src}/vtr_flow/tasks/regression_tests" ];
+    };
 
     # make a custom set of regression tests
-    make_regression_tests = import ./make_regression_tests.nix self;
+    make_regression_tests = mkTests "regression_tests" (import vtr_tests).regression_tests;
 
     # import tests
     tests = import ./tests.nix self;

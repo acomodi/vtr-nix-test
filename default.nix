@@ -83,6 +83,17 @@ let # build custom versions of Python with the packages we need
       };
     };
 
+    vtr_test_setup = vtr: stdenv.mkDerivation {
+      name = "vtr_test_setup";
+      buildInputs = [ time coreutils perl python3 ];
+      inherit titan_benchmarks ispd_benchmarks coreutils vtr;
+      vtr_src = vtr.src;
+      builder = "${bash}/bin/bash";
+      args = [ ./vtr_test_setup_builder.sh ];
+    };
+
+    vtr_test_setup_default = vtr_test_setup (vtrDerivation {});
+
     # list of tasks to run (config.txt) with run_vtr_task
     # opts.flags: flags passed tp vpr
     # opts.
@@ -96,9 +107,8 @@ let # build custom versions of Python with the packages we need
       in
         opts // {
           buildInputs = [ time coreutils perl python3 ];
-          vtr_flow = "${opts.vtr}/vtr_flow";
-          inherit titan_benchmarks ispd_benchmarks coreutils;
-          vtr_src = opts.vtr.src;
+          vtr_test_setup = vtr_test_setup opts.vtr;
+          inherit coreutils;
           builder = "${bash}/bin/bash";
           args = [ ./vtr_flow_builder.sh ];
           nativeBuildInputs = [ breakpointHook ]; # debug

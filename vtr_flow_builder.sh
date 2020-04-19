@@ -1,44 +1,10 @@
 source $stdenv/setup
 
-get_golden() {
-    local arch="$1"
-    local circuit="$2"
-    local script_params="$3"
-    local query="$4"
-
-    # read header
-    declare -A index
-    local header=
-    IFS=$'|\n' read -r -a header
-    for ((i = 0; i < ${#header[@]}; i++)); do
-        index["${header[$i]}"]=$i
-    done
-
-    # check header
-    if [ -z "${index[arch]}" ] || [ -z "${index[circuit]}" ] || [ -z "${index[${query}]}" ]; then
-        return 0
-    fi
-
-    # find matching data
-    local row=
-    while IFS=$'|\n' read -r -a row; do
-        if [ "${row[${index[arch]}]}" = "$arch" ] && [ "${row[${index[circuit]}]}" = "$circuit" ]; then
-            if [ -z "${index[script_params]}" ] || [ "${row[${index[script_params]}]}" = "$script_params" ]; then
-                echo "${row[${index[${query}]}]}"
-                return 0
-            fi
-        fi
-    done
-
-    # failed
-    return 0
-}
-
 ln -s $vtr_test_setup/* .
 vtr_flow=$vtr/vtr_flow
 
 if [ -e "$vtr_flow/tasks/$task/config/golden_results.txt" ]; then
-    expected_min_W=`cat "$vtr_flow/tasks/$task/config/golden_results.txt" | tr -d ' ' | tr '\t' '|' | get_golden $arch $circuit $script_params_name min_chan_width`
+    expected_min_W=`$python/bin/python $get_param $vtr_flow/tasks/$task/config/golden_results.txt $arch $circuit $script_params_name min_chan_width`
     expected_min_W=$((expected_min_W + expected_min_W % 2))
     if [ $expected_min_W -gt 0 ]; then
         hint="--min_route_chan_width_hint $expected_min_W"

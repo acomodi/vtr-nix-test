@@ -103,15 +103,19 @@ let # build custom versions of Python with the packages we need
             flags = "";
             run_id = "default";
             vtr = vtrDerivation {};
+            python = python3.withPackages (p: with p; [
+              pandas
+            ]);
           } // cfg;
       in
         opts // {
-          buildInputs = [ time coreutils perl python3 ];
+          buildInputs = [ time coreutils perl ];
           vtr_test_setup = vtr_test_setup opts.vtr;
+          get_param = ./get_param.py;
           inherit coreutils;
           builder = "${bash}/bin/bash";
           args = [ ./vtr_flow_builder.sh ];
-          nativeBuildInputs = [ breakpointHook ]; # debug
+          #nativeBuildInputs = [ breakpointHook ]; # debug
         });
     removeExtension = str: builtins.head (builtins.match "([^\.]*).*" str);
     nameStr = builtins.replaceStrings [" " "/" "." "," ":"] ["_" "_" "_" "_" "_"];
@@ -158,17 +162,18 @@ let # build custom versions of Python with the packages we need
         let attrToTests = name: value: addAll root (mkTests "${root}_${name}" value opts);
         in builtins.mapAttrs attrToTests attrs;
 
-    vtr_tests = derivation rec {
+    vtr_tests = vtr: derivation rec {
+      inherit vtr;
       name = "vtr_tests";
       system = builtins.currentSystem;
-      vtr = vtrDerivation {};
       vtr_src = vtr.src;
       builder = "${python}/bin/python";
       args = [ ./convert_tests.py "${vtr.src}/vtr_flow/tasks/regression_tests" ];
     };
 
     # make a custom set of regression tests
-    make_regression_tests = mkTests "regression_tests" (import vtr_tests).regression_tests;
+    make_regression_tests = opts@{ vtr ? vtrDerivation {}, ... }:
+      mkTests "regression_tests" (import (vtr_tests vtr)).regression_tests (opts // { inherit vtr; });
 
     # import tests
     tests = import ./tests.nix self;

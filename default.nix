@@ -1,5 +1,4 @@
 with import <nixpkgs> {};
-
 with lib;
 
 let # build custom versions of Python with the packages we need
@@ -12,6 +11,7 @@ let # build custom versions of Python with the packages we need
   python27 = pkgs.python27.withPackages python_packages;
   python3 = pkgs.python3.withPackages python_packages;
   self = rec {
+    inherit lib;
 
     # build and install binaries and vtr_flow
     vtrDerivation = { url ? "https://github.com/verilog-to-routing/vtr-verilog-to-routing.git", # git repo

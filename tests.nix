@@ -6,7 +6,10 @@
 # vtr.url: location of the VTR repo
 # vtr.rev: git revision
 # vtr.patches: list of patches to apply to VTR
-{ make_regression_tests, addAll, vtrDerivation, ... }:
+{ lib, make_regression_tests, addAll, vtrDerivation, nameStr, ... }:
+
+with lib;
+
 rec {
   # default VTR revision
   default_vtr_rev = "6428b63f06eccf5ead8c27158e22a46b0ad4cd19";
@@ -47,5 +50,30 @@ rec {
   node_reordering = make_regression_tests { vtr = vtr_node_reordering; flags = "--reorder_rr_graph_nodes_threshold 1 --reorder_rr_graph_nodes_algorithm degree_bfs"; };
   node_reordering_random = make_regression_tests { vtr = vtr_node_reordering; flags = "--reorder_rr_graph_nodes_threshold 1 --reorder_rr_graph_nodes_algorithm random_shuffle"; };
   node_reordering_off = make_regression_tests { vtr = vtr_node_reordering; };
-  inner_num_sweep_with_flag_high = addAll "with_flag" (make_inner_num_sweep "vtr_reg_nightly" (val: { run_id = "with_flag_high"; flags = "--alpha_min 0.2 --inner_num ${val}"; }) ["4.0" "10.0"]);
+  inner_num_sweep_with_flag_high = addAll "with_flag" (make_inner_num_sweep "vtr_reg_nightly" (val: { run_id = "with_flag_high"; vtr = vtr_dusty_sa; flags = "--alpha_min 0.2 --inner_num ${val}"; }) ["4.0" "10.0"]);
+
+  flag_sweep = flag: values: fn: {root, flags ? ""}:
+    addAll root (listToAttrs (map (value:
+      let name = nameStr "${flag} ${value}"; in
+      {
+        inherit name;
+        value = fn {
+          root = "${root}_${name}";
+          flags = "${flags} --${flag} ${value}";
+        };
+      }) values));
+
+  dusty_sa_sweep =
+    flag_sweep "alpha_min" ["0.1" "0.2" "0.5" "0.8"]
+      (flag_sweep "alpha_max" ["0.9" "0.95"]
+        (flag_sweep "alpha_decay" ["0.9" "0.7" "0.5"]
+          (flag_sweep "anneal_success_target" ["0.15" "0.25" "0.4"]
+            (flag_sweep "anneal_success_min" ["0.05" "0.1"]
+              ({root, flags}: (make_regression_tests {
+                vtr = vtr_dusty_sa;
+                inherit flags;
+              }).vtr_reg_nightly.titan_quick_qor.stratixiv_arch.stereo_vision_stratixiv_arch_timing.common))))) {
+                root = "dusty_sa_sweep";
+              };
+
 }

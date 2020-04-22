@@ -21,7 +21,7 @@ rec {
     variant = "dusty_sa";
     url = "https://github.com/HackerFoo/vtr-verilog-to-routing.git";
     ref = "dusty_sa";
-    rev = "7b945a3781ad12e7a5ef5ffd274348c40215b7fe";
+    rev = "b46fd7d22f25fb0f787ce2e7217d44f4960aad6b";
   };
 
   vtr_node_reordering = vtrDerivation {
@@ -52,28 +52,32 @@ rec {
   node_reordering_off = make_regression_tests { vtr = vtr_node_reordering; };
   inner_num_sweep_with_flag_high = addAll "with_flag" (make_inner_num_sweep "vtr_reg_nightly" (val: { run_id = "with_flag_high"; vtr = vtr_dusty_sa; flags = "--alpha_min 0.2 --inner_num ${val}"; }) ["4.0" "10.0"]);
 
-  flag_sweep = flag: values: fn: {root, flags ? ""}:
-    addAll root (listToAttrs (map (value:
-      let name = nameStr "${flag} ${value}"; in
-      {
-        inherit name;
-        value = fn {
-          root = "${root}_${name}";
-          flags = "${flags} --${flag} ${value}";
-        };
-      }) values));
+  # flag_sweep :: root -> attrs -> ({root, flags} -> derivation) -> derivations
+  flag_sweep = root: test: attrs:
+    foldl (test: flag:
+      {root, flags}:
+      addAll root (listToAttrs (map (value:
+        let name = nameStr "${flag} ${value}"; in
+        {
+          inherit name;
+          value = test {
+            root = "${root}_${name}";
+            flags = "${flags} --${flag} ${value}";
+          };
+        }) (getAttr flag attrs)))) test (attrNames attrs) { inherit root; flags = ""; };
 
   dusty_sa_sweep =
-    flag_sweep "alpha_min" ["0.1" "0.2" "0.5" "0.8"]
-      (flag_sweep "alpha_max" ["0.9" "0.95"]
-        (flag_sweep "alpha_decay" ["0.9" "0.7" "0.5"]
-          (flag_sweep "anneal_success_target" ["0.15" "0.25" "0.4"]
-            (flag_sweep "anneal_success_min" ["0.05" "0.1"]
-              ({root, flags}: (make_regression_tests {
-                vtr = vtr_dusty_sa;
-                inherit flags;
-              }).vtr_reg_nightly.titan_quick_qor.stratixiv_arch.stereo_vision_stratixiv_arch_timing.common))))) {
-                root = "dusty_sa_sweep";
-              };
-
+    let test = {root, flags}:
+          (make_regression_tests {
+            vtr = vtr_dusty_sa;
+            inherit flags;
+          }).vtr_reg_nightly.titan_quick_qor.all;
+    in
+    flag_sweep "dusty_sa_sweep" test {
+      alpha_min = ["0.1" "0.2" "0.5" "0.8"];
+      alpha_max = ["0.9" "0.95"];
+      alpha_decay = ["0.9" "0.7" "0.5"];
+      anneal_success_target = ["0.15" "0.25" "0.4"];
+      anneal_success_min = ["0.05" "0.1"];
+    };
 }

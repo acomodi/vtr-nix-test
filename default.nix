@@ -58,6 +58,7 @@ let # build custom versions of Python with the packages we need
             echo "ref:     ${ref}"    >> $out/opts
             echo "rev:     ${rev}"    >> $out/opts
           '';
+            enableParallelBuilding = true;
           };
 
     # download benchmarks

@@ -47,37 +47,69 @@ rec {
   inner_num_sweep_nightly_2 = make_inner_num_sweep_comparison "vtr_reg_nightly" ["0.125" "0.25" "0.5" "1.0" "2.0"] { run_id = "2"; };
   inner_num_sweep_nightly_3 = make_inner_num_sweep_comparison "vtr_reg_nightly" ["0.125" "0.25" "0.5" "1.0" "2.0"] { run_id = "3"; };
   dusty_sa = make_regression_tests { vtr = vtr_dusty_sa; flags = "--alpha_min 0.2"; };
-  node_reordering = make_regression_tests { vtr = vtr_node_reordering; flags = "--reorder_rr_graph_nodes_threshold 1 --reorder_rr_graph_nodes_algorithm degree_bfs"; };
-  node_reordering_random = make_regression_tests { vtr = vtr_node_reordering; flags = "--reorder_rr_graph_nodes_threshold 1 --reorder_rr_graph_nodes_algorithm random_shuffle"; };
-  node_reordering_off = make_regression_tests { vtr = vtr_node_reordering; };
   inner_num_sweep_with_flag_high = addAll "with_flag" (make_inner_num_sweep "vtr_reg_nightly" (val: { run_id = "with_flag_high"; vtr = vtr_dusty_sa; flags = "--alpha_min 0.2 --inner_num ${val}"; }) ["4.0" "10.0"]);
 
   # flag_sweep :: root -> attrs -> ({root, flags} -> derivation) -> derivations
   flag_sweep = root: test: attrs:
     foldl (test: flag:
       {root, flags}:
-      addAll root (listToAttrs (map (value:
-        let name = nameStr "${flag} ${value}"; in
+      addAll root (listToAttrs (filter ({value, ...}: value != null) (map (value:
+        let name = nameStr "${flag} ${builtins.toJSON value}"; in
         {
           inherit name;
           value = test {
             root = "${root}_${name}";
-            flags = "${flags} --${flag} ${value}";
+            flags = flags // { ${flag} = value; };
           };
-        }) (getAttr flag attrs)))) test (attrNames attrs) { inherit root; flags = ""; };
+        }) (getAttr flag attrs))))) test (attrNames attrs) { inherit root; flags = {}; };
+
+  flags_to_string = attrs: foldl (flags: flag: "${flags} --${flag} ${builtins.toJSON (getAttr flag attrs)}") "" (attrNames attrs);
 
   dusty_sa_sweep =
     let test = {root, flags}:
+          if flags.anneal_success_min >= flags.anneal_success_target then null else
           (make_regression_tests {
             vtr = vtr_dusty_sa;
-            inherit flags;
+            flags = flags_to_string flags;
+          }).vtr_reg_nightly.titan_quick_qor.stratixiv_arch.stereo_vision_stratixiv_arch_timing.common;
+    in
+      flag_sweep "dusty_sa_sweep" test {
+        alpha_min = [0.1 0.2 0.4 0.5 0.7 0.8];
+        alpha_max = [0.9 0.95 0.99];
+        alpha_decay = [0.9 0.8 0.7 0.6 0.5 0.4];
+        anneal_success_target = [0.15 0.25 0.4 0.44 0.5 0.6];
+        anneal_success_min = [0.05 0.1 0.15];
+      };
+
+  dusty_sa_new_inner_num_sweep =
+    let test = {root, flags}:
+          (make_regression_tests {
+            vtr = vtr_dusty_sa;
+            flags = flags_to_string (flags // {
+              alpha_min = "0.1";
+              alpha_max = "0.9";
+              alpha_decay = "0.5";
+              anneal_success_target = "0.4";
+              anneal_success_min = "0.1";
+            });
           }).vtr_reg_nightly.titan_quick_qor.all;
     in
-    flag_sweep "dusty_sa_sweep" test {
-      alpha_min = ["0.1" "0.2" "0.5" "0.8"];
-      alpha_max = ["0.9" "0.95"];
-      alpha_decay = ["0.9" "0.7" "0.5"];
-      anneal_success_target = ["0.15" "0.25" "0.4"];
-      anneal_success_min = ["0.05" "0.1"];
+      flag_sweep "dusty_sa_sweep" test {
+        inner_num = ["0.5" "1.0" "2.0" "4.0"];
     };
+
+  node_reordering =
+    let test = {root, flags}:
+          (make_regression_tests {
+            vtr = vtr_node_reordering;
+            flags = if flags.reorder_rr_graph_nodes_threshold == "-1"
+                    then "" # default
+                    else flags_to_string flags;
+          }).vtr_reg_nightly.titan_quick_qor.all;
+    in
+      flag_sweep "node_reordering" test {
+        reorder_rr_graph_nodes_threshold = ["-1" "1"];
+        reorder_rr_graph_nodes_algorithm = ["degree_bfs" "random_shuffle"];
+      };
+
 }

@@ -145,14 +145,16 @@ let # build custom versions of Python with the packages we need
         }) arch_list);
 
     # adds an .all derivation that links to all the other derivations in the set
+    getAll = val: if isAttrs val && !(val ? out) then val.all else val;
     addAll = root: tests:
       let f = name: val: {
             name = name;
-            path = if builtins.typeOf val == "set" then val.all else val;
+            path = getAll val;
           };
       in
-        tests // {
-          all = linkFarm "${nameStr root}_all" (mapAttrsToList f tests);
+        tests // rec {
+          summary = mkSummary (nameStr root) (map (name: getAll (getAttr name tests)) (attrNames tests));
+          all = linkFarm "${nameStr root}_all" ((mapAttrsToList f tests) ++ [{ name = "summary"; path = summary; }]);
         };
 
     mkTests = root: attrs: opts:
@@ -163,8 +165,17 @@ let # build custom versions of Python with the packages we need
         let attrToTests = name: value: addAll root (mkTests "${root}_${name}" value opts);
         in builtins.mapAttrs attrToTests attrs;
 
+    traceVal = val: builtins.trace (builtins.toJSON val) val;
+
+    mkSummary = root: drvs: derivation rec {
+      name = "${root}_summary";
+      python = python3.withPackages (p: with p; [ pandas pyarrow ]);
+      builder = "${python}/bin/python";
+      args = [ ./summarize_data.py ] ++ (map (drv: drv.out) drvs);
+      system = builtins.currentSystem;
+    };
+
     vtr_tests = vtr: derivation rec {
-      inherit vtr;
       name = "vtr_tests";
       system = builtins.currentSystem;
       vtr_src = vtr.src;

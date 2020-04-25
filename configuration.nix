@@ -10,7 +10,7 @@ let
   user_name = "<full name>";
 
   # Client SSH public key
-  ssh_key = "<contents of your ~/.ssh/id_rsa.pub>";
+  ssh_keys = [ "<contents of your ~/.ssh/id_rsa.pub>" ];
 
   # Builder's core count
   cores = 96;
@@ -28,14 +28,12 @@ in {
     group = "users";
     extraGroups = [ "wheel" ];
     useDefaultShell = true;
-    openssh.authorizedKeys.keys = [ ssh_key ];
+    openssh.authorizedKeys.keys = ssh_keys;
   };
 
   nix.maxJobs = cores;
   nix.buildCores = cores;
   nix.extraOptions = ''
-  trusted-users = ${user}
-  secret-key-files = /etc/nix/cache-priv-key.pem
-'';
-  zramSwap.enable = true;
+    trusted-users = ${user}
+  '';
 }

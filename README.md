@@ -26,15 +26,31 @@ nix ping-store --store ssh://<machine> # shouldn't print anything
 
 #### LET'S DO SOME TESTS
 
+Add these lines to `~/.config/nix/nix.conf`:
+
+```
+builders = ssh://<ip> - - <jobs> ; ...<for each ip> ; ...
+builders-use-substitutes = true
+```
+
 ```shell
 mkdir out
-nix build -f . tests.regression_tests.vtr_reg_strong.all -j0 --builders "ssh://<ip> - - <jobs> ; ...<for each ip>"
+nix build -f . tests.regression_tests.vtr_reg_strong.all -j0 -k
 ```
 
 If you'd like to see all the output:
 
 ```shell
-nix-build -A tests.regression_tests.vtr_reg_strong.all -j0 --builders "ssh://<ip> - - <jobs> ; ...<for each ip>"
+nix-build -A tests.regression_tests.vtr_reg_strong.all -j0 -k
+```
+
+Data will be in `result/summary/data.feather`, which can be loaded in Python with:
+
+```python
+import pandas as pd
+
+df = pd.read_feather('result/summary/data.feather')
+print(df)
 ```
 
 #### Creating a new test

@@ -18,11 +18,11 @@ Create instances with that image and at least a 2TB SSD and an external IP.
 Update the included `configuration.nix` and then for each instance:
 
 ```shell
-gcloud compute scp configuration.nix <machine>:
-gcloud compute ssh <machine> -t 'sudo cp configuration.nix /etc/nixos/configuration.nix; sudo nix-store --generate-binary-cache-key `hostname -s` /etc/nix/cache-priv-key.pem /etc/nix/cache-pub-key.pem; sudo nixos-rebuild switch'
-```
+gcloud compute scp configuration.nix root@<machine>:/etc/nixos/configuration.nix
+gcloud compute ssh root@<machine> -- nixos-rebuild switch
 
-SSH in (without the `gcloud` wrapper) to each instance to check that it works and to add the remote machine to `~/.ssh/known_hosts`. Make sure that no interactive password is required (e.g. use `ssh-add` if needed.)
+nix ping-store --store ssh://<machine> # shouldn't print anything
+```
 
 #### LET'S DO SOME TESTS
 
@@ -35,7 +35,6 @@ If you'd like to see all the output:
 
 ```shell
 nix-build -A tests.regression_tests.vtr_reg_strong.all -j0 --builders "ssh://<ip> - - <jobs> ; ...<for each ip>"
-
 ```
 
 #### Creating a new test
@@ -44,4 +43,18 @@ Add a top level attribute to `tests.nix`, with sub-attributes for what you want 
 
 See the top of that file for configuration options passed to `make_regression_tests`. You can select sub-tests by appending `.<test name>`.
 
-Tests are defined in `make_regression_tests.nix`, and mirror VTR's `task_list.txt`s.
+You can use `nix repl` to explore:
+
+```
+~/src/vtr-nix-test$ nix repl
+Welcome to Nix version 2.4. Type :? for help.
+
+nix-repl> :l
+Added 20 variables.
+
+nix-repl> tests.<TAB>
+tests.default_vtr_rev                  tests.dusty_sa_sweep                   tests.inner_num_sweep_nightly_2        tests.make_inner_num_sweep             tests.vtr_dusty_sa
+tests.dot_to_us                        tests.flag_sweep                       tests.inner_num_sweep_nightly_3        tests.make_inner_num_sweep_comparison  tests.vtr_node_reordering
+tests.dusty_sa                         tests.flags_to_string                  tests.inner_num_sweep_weekly           tests.node_reordering
+tests.dusty_sa_new_inner_num_sweep     tests.inner_num_sweep_nightly          tests.inner_num_sweep_with_flag_high   tests.regression_tests
+```

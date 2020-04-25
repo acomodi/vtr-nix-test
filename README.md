@@ -39,9 +39,7 @@ nix-build -A tests.regression_tests.vtr_reg_strong.all -j0 --builders "ssh://<ip
 
 #### Creating a new test
 
-Add a top level attribute to `tests.nix`, with sub-attributes for what you want to run using `make_regression_tests`.
-
-See the top of that file for configuration options passed to `make_regression_tests`. You can select sub-tests by appending `.<test name>`.
+Add a top level attribute to `tests.nix`, following the existing examples.
 
 You can use `nix repl` to explore:
 

@@ -54,7 +54,7 @@ rec {
     foldl (test: flag:
       {root, flags}:
       addAll root (listToAttrs (filter ({value, ...}: value != null) (map (value:
-        let name = nameStr "${flag} ${builtins.toJSON value}"; in
+        let name = nameStr "${flag} ${toString value}"; in
         {
           inherit name;
           value = test {
@@ -63,7 +63,7 @@ rec {
           };
         }) (getAttr flag attrs))))) test (attrNames attrs) { inherit root; flags = {}; };
 
-  flags_to_string = attrs: foldl (flags: flag: "${flags} --${flag} ${builtins.toJSON (getAttr flag attrs)}") "" (attrNames attrs);
+  flags_to_string = attrs: foldl (flags: flag: "${flags} --${flag} ${toString (getAttr flag attrs)}") "" (attrNames attrs);
 
   dusty_sa_sweep =
     let test = {root, flags}:
@@ -99,7 +99,7 @@ rec {
     };
 
   node_reordering =
-    let test = {root, flags}:
+    let test = {flags, ...}:
           (make_regression_tests {
             vtr = vtr_node_reordering;
             flags = if flags.reorder_rr_graph_nodes_threshold == "-1"
@@ -108,7 +108,7 @@ rec {
           }).vtr_reg_nightly.titan_quick_qor.all;
     in
       flag_sweep "node_reordering" test {
-        reorder_rr_graph_nodes_threshold = ["-1" "1"];
+        reorder_rr_graph_nodes_threshold = [(-1) 1];
         reorder_rr_graph_nodes_algorithm = ["degree_bfs" "random_shuffle"];
       };
 
@@ -116,7 +116,7 @@ rec {
     let test = {flags, ...}:
           (make_regression_tests {
             flags = flags_to_string flags;
-          }).vtr_reg_nightly.all;
+          }).vtr_reg_nightly.titan_quick_qor.all;
     in
       flag_sweep "various_seeds" test {
         # certified random

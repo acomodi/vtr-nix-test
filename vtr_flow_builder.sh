@@ -1,5 +1,7 @@
 source $stdenv/setup
 
+shopt -s extglob
+
 ln -s $vtr_test_setup/* .
 vtr_flow=$vtr/vtr_flow
 

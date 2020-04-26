@@ -165,7 +165,7 @@ let # build custom versions of Python with the packages we need
         let attrToTests = name: value: addAll root (mkTests "${root}_${name}" value opts);
         in builtins.mapAttrs attrToTests attrs;
 
-    traceVal = val: builtins.trace (builtins.toJSON val) val;
+    traceVal = val: builtins.trace (toString val) val;
 
     mkSummary = root: drvs: derivation rec {
       name = "${root}_summary";

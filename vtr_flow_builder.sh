@@ -45,8 +45,12 @@ find . -type f -name '*.out' -print0 | xargs -0 sed -i \
 # store the results
 mkdir -p $out
 
-# copy all but the largest files
-cp !(*.net|*.route|*.blif) $out
+if [ "$keep_all_files" != "1" ]; then
+  # copy all but the largest files
+  cp !(*.net|*.route|*.blif) $out
+else
+  cp * $out
+fi
 
 # record parameters
 cat <<EOF > $out/params

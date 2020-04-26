@@ -99,23 +99,21 @@ let # build custom versions of Python with the packages we need
     # opts.flags: flags passed tp vpr
     # opts.
     pathToName = builtins.replaceStrings ["/"] ["_"];
-    vtrFlowDerivation = cfg: stdenv.mkDerivation (
-      let opts = {
-            flags = "";
-            run_id = "default";
-            vtr = vtrDerivation {};
-            python = python3.withPackages (p: with p; [
-              pandas
-            ]);
-          } // cfg;
-      in
-        opts // {
+    vtrFlowDerivation = cfg @ { flags ? "",
+                                run_id ? "default",
+                                vtr ? vtrDerivation {},
+                                keep_all_files ? false,
+                                name, ... }:
+      stdenv.mkDerivation (
+        cfg // {
+          python = python3.withPackages (p: with p; [ pandas ]);
           buildInputs = [ time coreutils perl ];
-          vtr_test_setup = vtr_test_setup opts.vtr;
+          vtr_test_setup = vtr_test_setup vtr;
           get_param = ./get_param.py;
           inherit coreutils;
           builder = "${bash}/bin/bash";
           args = [ ./vtr_flow_builder.sh ];
+          requiredSystemFeatures = [ "benchmark" ]; # only run these on benchmark machines
           #nativeBuildInputs = [ breakpointHook ]; # debug
         });
     removeExtension = str: builtins.head (builtins.match "([^\.]*).*" str);

@@ -29,19 +29,20 @@ nix ping-store --store ssh://<machine> # shouldn't print anything
 Add these lines to `~/.config/nix/nix.conf`:
 
 ```
-builders = ssh://<ip> - - <jobs> ; ...<for each ip> ; ...
+builders = ssh://<ip> - - <jobs> 2 benchmark; ...<for each ip> ; ...
+system-features = kvm # local machine cannot be used for benchmarks
 builders-use-substitutes = true
 ```
 
 ```shell
 mkdir out
-nix build -f . tests.regression_tests.vtr_reg_strong.all -j0 -k
+nix build -f . tests.regression_tests.vtr_reg_strong.all -k
 ```
 
 If you'd like to see all the output:
 
 ```shell
-nix-build -A tests.regression_tests.vtr_reg_strong.all -j0 -k
+nix-build -A tests.regression_tests.vtr_reg_strong.all -k
 ```
 
 Data will be in `result/summary/data.feather`, which can be loaded in Python with:

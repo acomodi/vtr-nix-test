@@ -112,4 +112,19 @@ rec {
         reorder_rr_graph_nodes_algorithm = ["degree_bfs" "random_shuffle"];
       };
 
+  various_seeds =
+    let test = {flags, ...}:
+          (make_regression_tests {
+            flags = flags_to_string flags;
+          }).vtr_reg_nightly.all;
+    in
+      flag_sweep "various_seeds" test {
+        # certified random
+        seed = [1     20298 5371  3035  5261  26106 12494 19581 17395 8338
+                593   5083  14239 12627 20244 24796 16965 20183 17163 6367
+                25103 27794 28373 29380 9789  11759 20766 18985 18978 1887
+                30140 15801 29259 11418 26742 15711 15560 7412  218   8565
+                3681  14821 9232  17172 1178  21157 24468 29171 11682 3768];
+      };
+
 }

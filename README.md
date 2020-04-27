@@ -29,8 +29,8 @@ nix ping-store --store ssh://<machine> # shouldn't print anything
 Add these lines to `~/.config/nix/nix.conf`:
 
 ```
-builders = ssh://<ip> - - <jobs> 2 benchmark; ...<for each ip> ; ...
-system-features = kvm # local machine cannot be used for benchmarks
+builders = ssh://<ip> - - <jobs> 1 benchmark; ...<for each ip> ; ...
+system-features = local kvm # local machine cannot be used for benchmarks
 builders-use-substitutes = true
 ```
 

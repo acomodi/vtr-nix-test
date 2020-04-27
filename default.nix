@@ -165,12 +165,21 @@ let # build custom versions of Python with the packages we need
 
     traceVal = val: builtins.trace (toString val) val;
 
+    toString = x:
+      with builtins;
+      if isString x
+      then x
+      else
+        assert isInt x || isFloat x;
+        toJSON x;
+
     mkSummary = root: drvs: derivation rec {
       name = "${root}_summary";
       python = python3.withPackages (p: with p; [ pandas pyarrow ]);
       builder = "${python}/bin/python";
       args = [ ./summarize_data.py ] ++ (map (drv: drv.out) drvs);
       system = builtins.currentSystem;
+      requiredSystemFeatures = [ "local" ]; # these take a long time if run remotely
     };
 
     vtr_tests = vtr: derivation rec {

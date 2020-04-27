@@ -6,7 +6,7 @@
 # vtr.url: location of the VTR repo
 # vtr.rev: git revision
 # vtr.patches: list of patches to apply to VTR
-{ lib, make_regression_tests, addAll, vtrDerivation, nameStr, ... }:
+{ lib, make_regression_tests, addAll, vtrDerivation, nameStr, toString, ... }:
 
 with lib;
 

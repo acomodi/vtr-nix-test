@@ -12,8 +12,9 @@ def process_data(root):
   vtr_opts = read_params(root, "vtr_opts")
   df['vtr_variant'] = vtr_opts['variant']
   df['task'] = params['task']
+  df['run_id'] = params['run_id']
   df['path'] = root
-  for f in params['flags'].split('-'):
+  for f in params['flags'].split('--'):
     l = f.split(' ', 1)
     if(len(l) == 2):
       df[l[0].strip()] = l[1].strip()

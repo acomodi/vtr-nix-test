@@ -31,6 +31,13 @@ rec {
     rev = "7872c8f6cb32efb988138b50e3caf198bb2212ac";
   };
 
+  vtr_node_reordering_may5 = vtrDerivation {
+    variant = "node_reordering_flag_may5";
+    url = "https://github.com/HackerFoo/vtr-verilog-to-routing.git";
+    ref = "node_reordering_flag";
+    rev = "fb381c011f3b83deb1c63275ee0b923ea9c8151c";
+  };
+
   # a sweep over a few values of --inner_num
   dot_to_us = builtins.replaceStrings ["."] ["_"];
   make_inner_num_sweep = test_type: fn: values: builtins.listToAttrs (map (val: {
@@ -71,38 +78,50 @@ rec {
           (make_regression_tests {
             vtr = vtr_dusty_sa;
             flags = flags_to_string flags;
-          }).vtr_reg_nightly.titan_quick_qor.stratixiv_arch.stereo_vision_stratixiv_arch_timing.common;
-    in
-      flag_sweep "dusty_sa_sweep" test {
-        alpha_min = [0.1 0.2 0.4 0.5 0.7 0.8];
-        alpha_max = [0.9 0.95 0.99];
-        alpha_decay = [0.9 0.8 0.7 0.6 0.5 0.4];
-        anneal_success_target = [0.15 0.25 0.4 0.44 0.5 0.6];
-        anneal_success_min = [0.05 0.1 0.15];
-      };
-
-  dusty_sa_new_inner_num_sweep =
-    let test = {root, flags}:
-          (make_regression_tests {
-            vtr = vtr_dusty_sa;
-            flags = flags_to_string (flags // {
-              alpha_min = "0.1";
-              alpha_max = "0.9";
-              alpha_decay = "0.5";
-              anneal_success_target = "0.4";
-              anneal_success_min = "0.1";
-            });
           }).vtr_reg_nightly.titan_quick_qor.all;
     in
       flag_sweep "dusty_sa_sweep" test {
-        inner_num = ["0.5" "1.0" "2.0" "4.0"];
+        alpha_min = [0.4 0.5 0.7 0.8];
+        alpha_max = [0.9 0.95 0.99];
+        alpha_decay = [0.7 0.6 0.5 0.4];
+        anneal_success_target = [0.4 0.5 0.6];
+        anneal_success_min = [0.1 0.15];
+      };
+
+  baseline_inner_num_sweep =
+    let test = {flags, ...}:
+          (make_regression_tests {
+            flags = flags_to_string flags;
+          }).vtr_reg_weekly.vtr_reg_titan.all;
+    in
+      flag_sweep "baseline_inner_num_sweep" test {
+        inner_num = [0.25 0.5 1.0 2.0];
+        seed = range 1 20;
+    };
+
+  dusty_sa_new_inner_num_sweep =
+    let test = {flags, ...}:
+          (make_regression_tests {
+            vtr = vtr_dusty_sa;
+            flags = flags_to_string (flags // {
+              alpha_min = 0.8;
+              alpha_max = 0.9;
+              alpha_decay = 0.4;
+              anneal_success_target = 0.6;
+              anneal_success_min = 0.15;
+            });
+          }).vtr_reg_weekly.vtr_reg_titan.all;
+    in
+      flag_sweep "dusty_sa_new_inner_num_sweep" test {
+        inner_num = [0.5 1 2 3 4];
+        seed = range 1 10;
     };
 
   node_reordering =
     let test = {flags, ...}:
           (make_regression_tests {
-            vtr = vtr_node_reordering;
-            flags = if flags.reorder_rr_graph_nodes_threshold == "-1"
+            vtr = vtr_node_reordering_may5;
+            flags = if flags.reorder_rr_graph_nodes_threshold == (-1)
                     then "" # default
                     else flags_to_string flags;
           }).vtr_reg_nightly.titan_quick_qor.all;
@@ -116,15 +135,29 @@ rec {
     let test = {flags, ...}:
           (make_regression_tests {
             flags = flags_to_string flags;
-          }).vtr_reg_nightly.titan_quick_qor.all;
+          }).vtr_reg_nightly.titan_quick_qor.stratixiv_arch.sparcT1_core_stratixiv_arch_timing.common;
     in
       flag_sweep "various_seeds" test {
-        # certified random
-        seed = [1     20298 5371  3035  5261  26106 12494 19581 17395 8338
-                593   5083  14239 12627 20244 24796 16965 20183 17163 6367
-                25103 27794 28373 29380 9789  11759 20766 18985 18978 1887
-                30140 15801 29259 11418 26742 15711 15560 7412  218   8565
-                3681  14821 9232  17172 1178  21157 24468 29171 11682 3768];
+        seed = range 1 960;
+      };
+
+  many_runs =
+    let test = {flags, ...}:
+          (make_regression_tests flags).vtr_reg_nightly.titan_quick_qor.stratixiv_arch.sparcT1_core_stratixiv_arch_timing.common;
+    in
+      flag_sweep "many_runs" test {
+        run_id = range 1 960;
+      };
+
+  dusty_sa_no_flags =
+    let test = {flags, ...}:
+          (make_regression_tests {
+            vtr = vtr_dusty_sa;
+            flags = flags_to_string flags;
+          }).vtr_reg_weekly.all;
+    in
+      flag_sweep "dusty_sa_no_flags" test {
+        seed = range 1 20;
       };
 
 }

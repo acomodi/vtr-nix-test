@@ -173,19 +173,22 @@ let # build custom versions of Python with the packages we need
         assert isInt x || isFloat x;
         toJSON x;
 
-    mkSummary = root: drvs: derivation rec {
+    localDerivation = attrs: derivation ({
+      system = builtins.currentSystem;
+      requiredSystemFeatures = [ "local" ]; # these take a long time if run remotely
+    } // attrs);
+
+    mkSummary = root: drvs: localDerivation rec {
       name = "${root}_summary";
       python = python3.withPackages (p: with p; [ pandas pyarrow ]);
       builder = "${python}/bin/python";
       args = [ ./summarize_data.py ] ++ (map (drv: drv.out) drvs);
-      system = builtins.currentSystem;
-      requiredSystemFeatures = [ "local" ]; # these take a long time if run remotely
     };
 
-    vtr_tests = vtr: derivation rec {
+    vtr_tests = vtr: localDerivation rec {
       name = "vtr_tests";
-      system = builtins.currentSystem;
       vtr_src = vtr.src;
+      python = python3.withPackages (p: with p; [ pandas ]);
       builder = "${python}/bin/python";
       args = [ ./convert_tests.py "${vtr.src}/vtr_flow/tasks/regression_tests" ];
     };

@@ -119,6 +119,10 @@ rec {
                                     builder = "${bash}/bin/bash";
                                     args = [ ./vtr_flow_builder.sh ];
                                     requiredSystemFeatures = [ "benchmark" ]; # only run these on benchmark machines
+                                    meta = {
+                                      timeout = 259200; # 3 days
+                                      maxSilent = 259200; # 3 days
+                                    };
                                     #nativeBuildInputs = [ breakpointHook ]; # debug
                                   });
   removeExtension = str: builtins.head (builtins.match "([^\.]*).*" str);

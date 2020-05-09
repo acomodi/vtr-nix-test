@@ -42,4 +42,6 @@ for root in sys.argv[1:]:
     if results_file_name in files:
       dfs += [process_data(root)]
 if len(dfs) > 0:
-  pd.concat(dfs, ignore_index=True, sort=False).to_feather(os.path.join(out_dir, summary_file_name))
+  df = pd.concat(dfs, ignore_index=True, sort=False)
+  df = df.replace(-1, pd.NA) # -1 is treated as a missing value
+  df.to_feather(os.path.join(out_dir, summary_file_name))

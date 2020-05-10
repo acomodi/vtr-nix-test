@@ -33,6 +33,7 @@ def read_params(root, fn):
 out_dir = os.getenv('out')
 os.mkdir(out_dir)
 dfs = []
+summary_out = join(out_dir, summary_file_name)
 for root in sys.argv[1:]:
   files = os.listdir(root)
   if 'summary' in files:
@@ -45,9 +46,9 @@ for root in sys.argv[1:]:
 if len(dfs) > 0:
   df = pd.concat(dfs, ignore_index=True, sort=False)
   df = df.replace(-1, pd.NA) # -1 is treated as a missing value
-  df.to_feather(join(out_dir, summary_file_name))
+  df.to_feather(summary_out)
 
 nix_support = join(out_dir, 'nix-support')
 os.mkdir(nix_support)
 with open(join(nix_support, 'hydra-build-products'), 'w') as f:
-  f.write('file feather {}\n'.format(summary_file_name))
+  f.write('file feather {}\n'.format(summary_out))

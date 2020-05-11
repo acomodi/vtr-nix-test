@@ -164,4 +164,40 @@ rec {
         seed = range 1 20;
       };
 
+  mohameds_test = attrs:
+    make_regression_tests (attrs // {
+      tests = {
+        custom = {
+          task = "mohameds_test/custom";
+          qor_parse_file = "qor_standard.txt";
+          pass_requirements_file = "pass_requirements.txt";
+          arch_list = ["k6_frac_N10_frac_chain_mem32K_40nm.xml"];
+          circuit_list = ["bgm.v" "LU8PEEng.v" "LU32PEEng.v" "mcml.v" "stereovision0.v" "stereovision1.v" "stereovision2.v"];
+          archs_dir = "arch/timing";
+          circuits_dir = "benchmarks/verilog";
+          script_params = "-track_memory_usage --routing_failure_predictor off";
+          parse_file = "vpr_standard.txt";
+        };
+      };
+    });
+
+  vtr_directed_moves = vtrDerivation {
+    variant = "directed_moves";
+    url = "ssh://git@github.com/MohamedElgammal/directed_moves.git";
+    ref = "directed_moves";
+    rev = "d5e85c1f37cb1d2675a9c63230b72bf6e85ab487";
+  };
+
+  directed_moves_sweep =
+    let test = { flags, ...}: (mohameds_test {
+          flags = "--simpleRL_agent_placement on ${flags_to_string flags}";
+          vtr = vtr_directed_moves;
+        }).custom;
+    in
+      flag_sweep "directed_moves_sweep" test {
+        place_agent_gamma = [0.0005 0.001 0.005 0.01 0.05 0.1 0.5];
+        place_agent_epsilon = [0.05 0.1 0.2 0.3 0.4 0.5 0.9];
+        inner_num = [0.125 0.25 0.5 1 2];
+        seed = range 1 5;
+      };
 }

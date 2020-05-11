@@ -172,7 +172,7 @@ rec {
       let attrToTests = name: value: addAll root (mkTests "${root}_${name}" value opts);
       in builtins.mapAttrs attrToTests attrs;
 
-  traceVal = val: builtins.trace (toString val) val;
+  traceVal = val: builtins.trace (builtins.toJSON val) val;
 
   toString = x:
     with builtins;
@@ -203,6 +203,8 @@ rec {
   };
 
   # make a custom set of regression tests
-  make_regression_tests = opts@{ vtr ? vtrDerivation {}, ... }:
-    mkTests "regression_tests" (import (vtr_tests vtr)).regression_tests (opts // { inherit vtr; });
+  make_regression_tests = opts@{ vtr ? vtrDerivation {},
+                                 tests ? (import (vtr_tests vtr)).regression_tests,
+                                 ... }:
+    mkTests "regression_tests" tests (removeAttrs opts [ "tests" ]);
 }

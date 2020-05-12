@@ -184,7 +184,7 @@ rec {
 
   localDerivation = attrs: derivation ({
     system = builtins.currentSystem;
-    requiredSystemFeatures = [ "local" ]; # these take a long time if run remotely
+    preferLocalBuild = true; # these take a long time if run remotely
   } // attrs);
 
   mkSummary = root: drvs: localDerivation rec {

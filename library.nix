@@ -115,7 +115,7 @@ rec {
                                     buildInputs = [ time coreutils perl ];
                                     vtr_test_setup = vtr_test_setup vtr;
                                     get_param = ./get_param.py;
-                                    inherit coreutils;
+                                    inherit coreutils vtr;
                                     builder = "${bash}/bin/bash";
                                     args = [ ./vtr_flow_builder.sh ];
                                     requiredSystemFeatures = [ "benchmark" ]; # only run these on benchmark machines
@@ -196,7 +196,6 @@ rec {
 
   vtr_tests = vtr: localDerivation rec {
     name = "vtr_tests";
-    vtr_src = vtr.src;
     python = python3.withPackages (p: with p; [ pandas ]);
     builder = "${python}/bin/python";
     args = [ ./convert_tests.py "${vtr.src}/vtr_flow/tasks/regression_tests" ];

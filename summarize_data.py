@@ -46,6 +46,7 @@ for root in sys.argv[1:]:
 if len(dfs) > 0:
   df = pd.concat(dfs, ignore_index=True, sort=False)
   df = df.replace(-1, pd.NA) # -1 is treated as a missing value
+  df = df.convert_dtypes() # without this, may not be able to serialize missing values
   df.to_feather(summary_out)
 
 nix_support = join(out_dir, 'nix-support')

@@ -123,8 +123,11 @@ rec {
                                       timeout = 259200; # 3 days
                                       maxSilent = 259200; # 3 days
                                     };
+                                    flags = if builtins.isAttrs flags then flags_to_string flags else flags;
                                     #nativeBuildInputs = [ breakpointHook ]; # debug
                                   });
+
+  flags_to_string = attrs: foldl (flags: flag: "${flags} --${flag} ${toString (getAttr flag attrs)}") "" (attrNames attrs);
   removeExtension = str: builtins.head (builtins.match "([^\.]*).*" str);
   nameStr = builtins.replaceStrings [" " "/" "." "," ":"] ["_" "_" "_" "_" "_"];
   vtrTaskDerivations = root: cfg @ { arch_list, circuit_list, script_params_list ? [""],
@@ -205,5 +208,22 @@ rec {
   make_regression_tests = opts@{ vtr ? vtrDerivation {},
                                  tests ? (import (vtr_tests vtr)).regression_tests,
                                  ... }:
-    mkTests "regression_tests" tests (removeAttrs opts [ "tests" ]);
+    addAll "regression_tests" (mkTests "regression_tests" tests (removeAttrs opts [ "tests" ]));
+
+  summariesOf = mapAttrs (name: value: value.summary);
+
+  # flag_sweep :: root -> attrs -> ({root, flags} -> derivation) -> derivations
+  flag_sweep = root: test: attrs:
+    foldl (test: flag:
+      {root, flags}:
+      addAll root (listToAttrs (filter ({value, ...}: value != null) (map (value:
+        let name = nameStr "${flag} ${toString value}"; in
+        {
+          inherit name;
+          value = test {
+            root = "${root}_${name}";
+            flags = flags // { ${flag} = value; };
+          };
+        }) (getAttr flag attrs))))) test (attrNames attrs) { inherit root; flags = {}; };
+
 }

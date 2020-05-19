@@ -210,7 +210,7 @@ rec {
                                  ... }:
     addAll "regression_tests" (mkTests "regression_tests" tests (removeAttrs opts [ "tests" ]));
 
-  summariesOf = mapAttrs (name: value: value.summary);
+  summariesOf = mapAttrs (name: value: { of = value; } // value.summary);
 
   # flag_sweep :: root -> attrs -> ({root, flags} -> derivation) -> derivations
   flag_sweep = root: test: attrs:

@@ -13,21 +13,21 @@ let vtr_dusty_sa = vtrDerivation {
     };
 in
 summariesOf {
-  base = make_regression_tests {};
+  base = (make_regression_tests {}).vtr_reg_nightly.titan_quick_qor;
   dusty_sa_sweep =
     let test = {root, flags}:
           if flags.anneal_success_min >= flags.anneal_success_target then null else
             (make_regression_tests {
               vtr = vtr_dusty_sa;
-              flags = flags_to_string flags;
-            }).vtr_reg_nightly.titan_quick_qor.all;
+              inherit flags;
+            }).vtr_reg_nightly.titan_quick_qor;
     in
       flag_sweep "dusty_sa_sweep" test {
-        alpha_min = [0.4 0.5 0.7 0.8];
-        alpha_max = [0.9 0.95 0.99];
-        alpha_decay = [0.7 0.65 0.6 0.55 0.5 0.45 0.4];
-        anneal_success_target = [0.35 0.4 0.45 0.5 0.55 0.6 0.65];
-        anneal_success_min = [0.05 0.1 0.12 0.15];
+        alpha_min = [0.7 0.8 0.85];
+        alpha_max = [0.86 0.9];
+        alpha_decay = [0.55 0.5 0.45 0.4];
+        anneal_success_target = [0.5 0.55 0.6 0.65];
+        anneal_success_min = [0.1 0.15];
       };
 }
 

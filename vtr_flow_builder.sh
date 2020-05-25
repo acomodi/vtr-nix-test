@@ -1,6 +1,7 @@
 source $stdenv/setup
 
 shopt -s extglob
+set -eo pipefail
 
 ln -s $vtr_test_setup/* .
 vtr_flow=$vtr/vtr_flow
@@ -26,14 +27,14 @@ $script_params \
 $hint \
 $flags
 EOF
-bash vtr_flow.sh |& tee vtr_flow.out || true # don't abort on failure
+bash vtr_flow.sh |& tee vtr_flow.out
 
 # parse the results
 if [ -n "$parse_file" ]; then
-    $vtr_flow/scripts/parse_vtr_flow.pl . $vtr_flow/parse/parse_config/$parse_file arch=$arch circuit=$circuit script_params=$script_params_name > parse_results.txt || true
+    $vtr_flow/scripts/parse_vtr_flow.pl . $vtr_flow/parse/parse_config/$parse_file arch=$arch circuit=$circuit script_params=$script_params_name > parse_results.txt
 fi
 if [ -n "$qor_parse_file" ]; then
-    $vtr_flow/scripts/parse_vtr_flow.pl . $vtr_flow/parse/qor_config/$qor_parse_file > qor_results.txt || true
+    $vtr_flow/scripts/parse_vtr_flow.pl . $vtr_flow/parse/qor_config/$qor_parse_file > qor_results.txt
 fi
 
 # remove references

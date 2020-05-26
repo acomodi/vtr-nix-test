@@ -22,7 +22,7 @@ mkdir vpr
 mkdir ODIN_II
 
 mkdir -p vtr_flow/scripts
-cp -nrs $vtr_flow/{arch,benchmarks,misc,scripts} vtr_flow/
+cp -nrs $vtr_flow/* vtr_flow/
 
 cp -s $vtr/bin/vpr vpr
 cp -s $vtr/bin/odin_II ODIN_II

@@ -49,9 +49,6 @@ done
 
 link_blif_and_sdc "$titan_benchmarks/titan_release_*/benchmarks/titan23/*/*/*.blif" vtr_flow/benchmarks/titan_blif
 link_blif_and_sdc "$titan_benchmarks/titan_release_*/benchmarks/other_benchmarks/*/*/*.blif" vtr_flow/benchmarks/titan_other_blif
-
-if [ "$archs_dir" = "arch/ispd" ]; then
-    cp -s $ispd_benchmarks/ispd_benchmarks_*/benchmarks/*/*.blif vtr_flow/benchmarks/ispd_blif
-fi
+cp -s $ispd_benchmarks/ispd_benchmarks_*/benchmarks/*/*.blif vtr_flow/benchmarks/ispd_blif
 
 chmod -R -w .

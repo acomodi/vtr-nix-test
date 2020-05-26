@@ -7,11 +7,19 @@ ln -s $vtr_test_setup/* .
 vtr_flow=$vtr/vtr_flow
 
 if [ -e "$vtr_flow/tasks/$task/config/golden_results.txt" ]; then
-    expected_min_W=`$python/bin/python $get_param $vtr_flow/tasks/$task/config/golden_results.txt $arch $circuit $script_params_name min_chan_width`
+    expected_min_W=`python $get_param $vtr_flow/tasks/$task/config/golden_results.txt $arch $circuit $script_params_name min_chan_width`
     expected_min_W=$((expected_min_W + expected_min_W % 2))
-    if [ $expected_min_W -gt 0 ]; then
+    if (($expected_min_W > 0)); then
         hint="--min_route_chan_width_hint $expected_min_W"
     fi
+    expected_vpr_status=`python $get_param $vtr_flow/tasks/$task/config/golden_results.txt $arch $circuit $script_params_name vpr_status`
+    if [[ ( -n "$expected_vpr_status" ) && ( "$expected_vpr_status" != "success" ) ]]; then
+        expect_fail="-expect_fail '$expected_vpr_status'"
+    fi
+fi
+
+if [[ -n "$cmos_tech_behavior" ]]; then
+    cmos_tech="-cmos_tech $vtr_flow/tech/$cmos_tech_behavior"
 fi
 
 # run the task
@@ -22,12 +30,20 @@ cat <<EOF > vtr_flow.sh
 ../vtr_flow/$circuits_dir/$circuit \
 ../vtr_flow/$archs_dir/$arch \
 -temp_dir . \
+-show_failures \
 $script_params_common \
 $script_params \
+$cmos_tech \
 $hint \
+$expect_fail \
 $flags
 EOF
-bash vtr_flow.sh |& tee vtr_flow.out
+
+if [[ "$okay_to_fail" == "1" ]]; then
+    bash vtr_flow.sh |& tee vtr_flow.out || true
+else
+    bash vtr_flow.sh |& tee vtr_flow.out
+fi
 
 # parse the results
 if [ -n "$parse_file" ]; then

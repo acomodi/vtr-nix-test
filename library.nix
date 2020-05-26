@@ -108,11 +108,14 @@ rec {
                               run_id ? "default",
                               vtr ? vtrDerivation {},
                               keep_all_files ? false,
+                              okay_to_fail ? false,
                               name, ... }:
+                                let
+                                  python = python3.withPackages (p: with p; [ pandas ]);
+                                in
                                 stdenv.mkDerivation (
                                   cfg // {
-                                    python = python3.withPackages (p: with p; [ pandas ]);
-                                    buildInputs = [ time coreutils perl ];
+                                    buildInputs = [ time coreutils perl python ];
                                     vtr_test_setup = vtr_test_setup vtr;
                                     get_param = ./get_param.py;
                                     inherit coreutils vtr;

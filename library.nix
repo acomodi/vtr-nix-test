@@ -115,7 +115,7 @@ rec {
                                 in
                                 stdenv.mkDerivation (
                                   cfg // {
-                                    buildInputs = [ time coreutils perl python ];
+                                    buildInputs = [ time coreutils perl python valgrind ];
                                     vtr_test_setup = vtr_test_setup vtr;
                                     get_param = ./get_param.py;
                                     inherit coreutils vtr;

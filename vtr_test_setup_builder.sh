@@ -25,6 +25,7 @@ mkdir -p vtr_flow/scripts
 cp -nrs $vtr_flow/* vtr_flow/
 
 cp -s $vtr/bin/vpr vpr
+cp -s $vtr_src/vpr/*.supp vpr
 cp -s $vtr/bin/odin_II ODIN_II
 cp -rs $vtr_src/abc .
 cp -rs $vtr_src/ace2 .

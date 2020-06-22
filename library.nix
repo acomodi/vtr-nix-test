@@ -21,7 +21,7 @@ rec {
   # build and install binaries and vtr_flow
   vtrDerivation = { url ? "https://github.com/verilog-to-routing/vtr-verilog-to-routing.git", # git repo
                     variant ? "verilog-to-routing", # identifier
-                    ref ? "HEAD", # git ref
+                    ref ? "master", # git ref
                     rev ? default_vtr_rev, # specific revision
                     patches ? [] # any patches to apply
                   }: stdenv.mkDerivation {

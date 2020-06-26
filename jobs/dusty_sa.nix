@@ -30,6 +30,16 @@ summariesOf {
     flag_sweep "no_flag_regression_seeds" test {
       seed = range 32 64;
     };
+  no_flag_regression_seeds_bitcoin = let
+    test = { flags, ... }:
+      (make_regression_tests {
+        vtr = vtr_dusty_sa;
+        inherit flags;
+      }).vtr_reg_nightly.titan_quick_qor.stratixiv_arch.bitcoin_miner_stratixiv_arch_timing;
+  in
+    flag_sweep "no_flag_regression_seeds_bitcoin" test {
+      seed = range 128 256;
+    };
 }
 
     

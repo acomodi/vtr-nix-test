@@ -13,7 +13,7 @@ let vtr_dusty_sa = vtrDerivation {
       variant = "dusty_sa";
       url = "https://github.com/HackerFoo/vtr-verilog-to-routing.git";
       ref = "dusty_sa";
-      rev = "d7930ad06d99008c055f37de9e60d244f0590d71";
+      rev = "519a5031d3a41a7bdaf9a9e1b1bf0a40e99bfdda";
     };
 in
 summariesOf {

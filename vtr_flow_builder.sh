@@ -81,3 +81,7 @@ script_params: $script_params
 hint: $hint
 EOF
 cp "$vtr/opts" $out/vtr_opts
+
+# make all files build products
+mkdir -p $out/nix-support
+find $out -type f -printf "file data %p\n" >> $out/nix-support/hydra-build-products

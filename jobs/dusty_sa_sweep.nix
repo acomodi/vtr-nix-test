@@ -30,6 +30,3 @@ summariesOf {
         anneal_success_min = [0.1 0.15];
       };
 }
-
-    
-      

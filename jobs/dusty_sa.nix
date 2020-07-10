@@ -4,7 +4,7 @@
 
 with import ../library.nix {
   inherit pkgs;
-  default_vtr_rev = "6428b63f06eccf5ead8c27158e22a46b0ad4cd19";
+  default_vtr_rev = "0a6ce4d388ecee8aa6564307df71c3a5c26107ec";
 };
 
 with pkgs.lib;
@@ -14,7 +14,7 @@ let
     variant = "dusty_sa";
     url = "https://github.com/HackerFoo/vtr-verilog-to-routing.git";
     ref = "dusty_sa";
-    rev = "519a5031d3a41a7bdaf9a9e1b1bf0a40e99bfdda";
+    rev = "c12ab323885b6fdbe3d55adf086a59f2ce04587d";
   };
   dusty_sa_flags = {
     alpha_min = 0.8;

@@ -52,6 +52,16 @@ summariesOf {
     flag_sweep "no_flag_regression_seeds_bitcoin" test {
       seed = range 128 256;
     };
+  no_flag_regression_seeds_vtr_bidir = let
+    test = { flags, ... }:
+      (make_regression_tests {
+        vtr = vtr_dusty_sa;
+        inherit flags;
+      }).vtr_reg_nightly.vtr_bidir;
+  in
+    flag_sweep "no_flag_regression_seeds_vtr_bidir" test {
+      seed = range 128 256;
+    };
 }
 
     

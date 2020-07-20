@@ -17,13 +17,20 @@ let
     rev = "c12ab323885b6fdbe3d55adf086a59f2ce04587d";
   };
 in
-listToAttrs (map (seed: {
-  name = "seed_${toString seed}";
-  value = (make_regression_tests {
-    vtr = vtr_dusty_sa;
-    flags = { inherit seed; };
-  }).vtr_reg_nightly.vtr_bidir.summary;
-}) (range 128 256))
+listToAttrs (
+  (map (seed: {
+    name = "seed_${toString seed}";
+    value = (make_regression_tests {
+      vtr = vtr_dusty_sa;
+      flags = { inherit seed; };
+    }).vtr_reg_nightly.vtr_bidir.summary;
+  }) (range 128 256)) ++
+  (map (seed: {
+    name = "seed_${toString seed}_baseline";
+    value = (make_regression_tests {
+      flags = { inherit seed; };
+    }).vtr_reg_nightly.vtr_bidir.summary;
+  }) (range 128 256)))
 
     
       

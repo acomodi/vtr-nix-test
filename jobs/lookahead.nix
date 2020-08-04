@@ -13,16 +13,21 @@ let
   vtr_extended_lookahead = vtrDerivation {
     variant = "extended_lookahead";
     url = "https://github.com/acomodi/vtr-verilog-to-routing.git";
-    ref = "add-extended-lookahead-map-changes";
-    rev = "db9723326194aaa3473a6350ecf6c07f16b4b783";
+    ref = "new-extended-lookahead";
+    rev = "04c6b116efb6ab784fad66abfeb454031d0440e8";
   };
 
   vtr_default = vtrDerivation {
     variant = "baseline";
     url = "https://github.com/acomodi/vtr-verilog-to-routing.git";
-    ref = "add-extended-lookahead-map-changes";
-    rev = "380743285feb2c97653077e31869d3ada564eee6";
+    ref = "new-extended-lookahead";
+    rev = "a89a45544179724cd7eb01c99948ea5683115f9a";
   };
+
+  flags = {
+    router_lookahead = "extended_map";
+  };
+
 in
 summariesOf {
   base_regression_tests = (make_regression_tests {
@@ -31,5 +36,10 @@ summariesOf {
 
   changes_regression_tests = (make_regression_tests {
     vtr = vtr_extended_lookahead;
+  }).vtr_reg_strong;
+
+  changes_extended_lookahead_regression_tests = (make_regression_tests {
+    vtr = vtr_extended_lookahead;
+    flags = flags;
   }).vtr_reg_strong;
 }

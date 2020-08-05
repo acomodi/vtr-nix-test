@@ -32,14 +32,14 @@ in
 summariesOf {
   base_regression_tests = (make_regression_tests {
     vtr = vtr_default;
-  }).vtr_reg_strong;
+  }).vtr_reg_nightly.titan_quick_qor.stratixiv_arch.neuron_stratixiv_arch_timing;
 
   changes_regression_tests = (make_regression_tests {
     vtr = vtr_extended_lookahead;
-  }).vtr_reg_strong;
+  }).vtr_reg_nightly.titan_quick_qor.stratixiv_arch.neuron_stratixiv_arch_timing;
 
   changes_extended_lookahead_regression_tests = (make_regression_tests {
     vtr = vtr_extended_lookahead;
     flags = flags;
-  }).vtr_reg_strong;
+  }).vtr_reg_nightly.titan_quick_qor.stratixiv_arch.neuron_stratixiv_arch_timing;
 }

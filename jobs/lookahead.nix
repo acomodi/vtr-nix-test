@@ -14,7 +14,7 @@ let
     variant = "extended_lookahead";
     url = "https://github.com/acomodi/vtr-verilog-to-routing.git";
     ref = "new-extended-lookahead";
-    rev = "a89a45544179724cd7eb01c99948ea5683115f9a";
+    rev = "66990676a9350f6725b65490f45a3aa173de4a39";
   };
 
   vtr_default = vtrDerivation {

@@ -1,7 +1,7 @@
 { ... }: # ignore arguments
 
 with import ../library.nix {
-  default_vtr_rev = "0a6ce4d388ecee8aa6564307df71c3a5c26107ec";
+  default_vtr_rev = "d4ea40548ee30aa13e27df5268760a86e38ad289";
   pkgs = import <nixpkgs> {}; # import default.nix, passing in nixpkgs
 };
 

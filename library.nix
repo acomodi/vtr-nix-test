@@ -57,7 +57,6 @@ rec {
                     };
                     patches = [ ./install_abc.patch ] ++ patches;
                     postInstall = ''
-            cp -r $src/vtr_flow $out
             echo "variant: ${variant}" > $out/opts
             echo "url:     ${url}"    >> $out/opts
             echo "ref:     ${ref}"    >> $out/opts
@@ -89,9 +88,11 @@ rec {
     };
   };
 
+  vtr_test_python = python3.withPackages (p: with p; [ pandas prettytable ]);
+
   vtr_test_setup = vtr: stdenv.mkDerivation {
     name = "vtr_test_setup";
-    buildInputs = [ time coreutils perl python3 ];
+    buildInputs = [ time coreutils perl vtr_test_python ];
     inherit titan_benchmarks ispd_benchmarks coreutils vtr;
     vtr_src = vtr.src;
     builder = "${bash}/bin/bash";
@@ -110,13 +111,11 @@ rec {
                               keep_all_files ? false,
                               okay_to_fail ? false,
                               name, ... }:
-                                let
-                                  python = python3.withPackages (p: with p; [ pandas ]);
-                                in
                                 stdenv.mkDerivation (
                                   cfg // {
-                                    buildInputs = [ time coreutils perl python valgrind ];
+                                    buildInputs = [ time coreutils perl vtr_test_python valgrind ];
                                     vtr_test_setup = vtr_test_setup vtr;
+                                    vtr_src = vtr.src;
                                     get_param = ./get_param.py;
                                     inherit coreutils vtr;
                                     builder = "${bash}/bin/bash";

@@ -4,7 +4,7 @@ shopt -s extglob
 set -eo pipefail
 
 ln -s $vtr_test_setup/* .
-vtr_flow=$vtr/vtr_flow
+vtr_flow=$vtr_src/vtr_flow
 task_dir=$vtr_flow/tasks/$task
 
 if [ -e "$task_dir/config/golden_results.txt" ]; then
@@ -35,7 +35,7 @@ for f in $task_dir/*; do
 done
 
 cat <<EOF > vtr_flow.sh
-../vtr_flow/scripts/run_vtr_flow.pl \
+../vtr_flow/scripts/run_vtr_flow.py \
 ../vtr_flow/$circuits_dir/$circuit \
 ../vtr_flow/$archs_dir/$arch \
 -temp_dir . \
@@ -56,10 +56,10 @@ fi
 
 # parse the results
 if [ -n "$parse_file" ]; then
-    $vtr_flow/scripts/parse_vtr_flow.pl . $vtr_flow/parse/parse_config/$parse_file arch=$arch circuit=$circuit script_params=$script_params_name > parse_results.txt
+    python $vtr_flow/scripts/python_libs/vtr/parse_vtr_flow.py . $vtr_flow/parse/parse_config/$parse_file arch=$arch circuit=$circuit script_params=$script_params_name > parse_results.txt
 fi
 if [ -n "$qor_parse_file" ]; then
-    $vtr_flow/scripts/parse_vtr_flow.pl . $vtr_flow/parse/qor_config/$qor_parse_file > qor_results.txt
+    python $vtr_flow/scripts/python_libs/vtr/parse_vtr_flow.py . $vtr_flow/parse/qor_config/$qor_parse_file > qor_results.txt
 fi
 
 # remove references

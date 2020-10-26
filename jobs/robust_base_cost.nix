@@ -14,7 +14,7 @@ let
     variant = "extended_lookahead";
     url = "https://github.com/acomodi/vtr-verilog-to-routing.git";
     ref = "robust-delay-norm-factor";
-    rev = "f2634acba01206382f388d7cabfbbcefbccf7ac6";
+    rev = "4c55d01eb694758c0def39a3daec57f2329fe0c3";
   };
 
   vtr_default = vtrDerivation {

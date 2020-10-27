@@ -11,10 +11,10 @@ with pkgs.lib;
 
 let
   vtr_base_cost = vtrDerivation {
-    variant = "extended_lookahead";
+    variant = "robust_base_cost";
     url = "https://github.com/acomodi/vtr-verilog-to-routing.git";
     ref = "robust-delay-norm-factor";
-    rev = "4c55d01eb694758c0def39a3daec57f2329fe0c3";
+    rev = "27d40ac1848a98ecefbe1361a7843c078b99c67a";
   };
 
   vtr_default = vtrDerivation {

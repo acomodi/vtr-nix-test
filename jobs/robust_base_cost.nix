@@ -14,7 +14,7 @@ let
     variant = "robust_base_cost";
     url = "https://github.com/acomodi/vtr-verilog-to-routing.git";
     ref = "robust-delay-norm-factor";
-    rev = "3c9164376bca7144cdbad95a43f3ecc52447fa08";
+    rev = "0a8a53c306b5357e1f15b120e12a401178fde621";
   };
 
   vtr_default = vtrDerivation {

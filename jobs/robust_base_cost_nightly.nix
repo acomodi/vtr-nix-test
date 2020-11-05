@@ -10,11 +10,18 @@ with import ../library.nix {
 with pkgs.lib;
 
 let
-  vtr_base_cost = vtrDerivation {
+  vtr_base_cost_4x = vtrDerivation {
     variant = "extended_lookahead";
     url = "https://github.com/acomodi/vtr-verilog-to-routing.git";
-    ref = "robust-delay-norm-factor";
-    rev = "4c55d01eb694758c0def39a3daec57f2329fe0c3";
+    ref = "test-4x-delay-fac";
+    rev = "d151cab5a612af73ce416b4dfc0f0fac6dbcd502";
+  };
+
+  vtr_base_cost_3x = vtrDerivation {
+    variant = "extended_lookahead";
+    url = "https://github.com/acomodi/vtr-verilog-to-routing.git";
+    ref = "test-3x-delay-factor";
+    rev = "7d08c066b2135d85fded40445222ef253eb0868d";
   };
 
   vtr_default = vtrDerivation {
@@ -28,9 +35,13 @@ in
 summariesOf {
   base_regression_tests = (make_regression_tests {
     vtr = vtr_default;
-  }).vtr_reg_nightly;
+  }).vtr_reg_nightly.titan_quick_qor;
 
-  changes_regression_tests = (make_regression_tests {
-    vtr = vtr_base_cost;
-  }).vtr_reg_nightly;
+  delay_norm_4x_regression_tests = (make_regression_tests {
+    vtr = vtr_base_cost_4x;
+  }).vtr_reg_nightly.titan_quick_qor;
+
+  delay_norm_3x_regression_tests = (make_regression_tests {
+    vtr = vtr_base_cost_3x;
+  }).vtr_reg_nightly.titan_quick_qor;
 }

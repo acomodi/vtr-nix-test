@@ -13,15 +13,15 @@ let
   vtr_base_cost_histogram = vtrDerivation {
     variant = "robust_base_cost";
     url = "https://github.com/acomodi/vtr-verilog-to-routing.git";
-    ref = "robust-base-cost-mode";
-    rev = "769828c1363f1343f86afc0aa8b04a776035f44d";
+    ref = "robust-delay-norm-factor";
+    rev = "78e218cbba0fae8771f0cb130bec27122e7a7bf0";
   };
 
   vtr_default = vtrDerivation {
     variant = "baseline";
     url = "https://github.com/acomodi/vtr-verilog-to-routing.git";
-    ref = "robust-base-cost-mode";
-    rev = "236bfcd720e163ab3853d8500fa9cfa222a3240c";
+    ref = "robust-delay-norm-factor";
+    rev = "2efa8d0bff34688a02b4fec7e0b5b7d44824f6c1";
   };
 
 in
